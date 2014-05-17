@@ -2,9 +2,231 @@
 <html>
 <head>
 	<title>To Do List app</title>
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap-theme.min.css" />
+	<style>
+		#main-wrapper {
+			margin-top: 30px;
+			max-width: 600px;
+		}
+		.navbar-right {
+			margin-right: 0px !important;
+		}
+		#task-form {
+			margin-top: 30px;
+		}
+		#task-form input#task-input {
+			padding: 20px 10px;
+			font-size: 19px;
+			width: 515px;
+		}
+		#task-form input#add-btn {
+			padding: 3px 14px;
+			font-weight: bold;
+			font-size: 24px;
+			margin-left: 7px;
+		}
+		#tasks-list {
+			margin-top: 5px;
+		}
+		#tasks-list li {
+			border-top: 0;
+			border-bottom: 1px solid #ddd;
+			padding: 17px 8px;
+			font-size: 19px;
+			cursor: default;
+			position: relative;
+		}
+		#tasks-list li .drag-handle {
+			float: left;
+			width: 40px;
+			opacity: 0.4;
+		}
+		#tasks-list li .item-checkbox {
+			float: left;
+			margin-left: 5px;
+			margin-top: 4px;
+		}
+		#tasks-list li:hover .item-remove {
+			display: inline;
+		}
+		#tasks-list li .item-remove {
+			display: none;
+			position: absolute;
+			right: 20px;
+			top: 0;
+			bottom: 0;
+			cursor: pointer;
+			margin: auto 0;
+			height: 23px;
+		}
+		#tasks-list li .task {
+			float: left;
+			margin-left: 10px;
+			margin-top: 6px;
+			max-width: 440px;
+		}
+		#temp-msg {
+			position: absolute;
+			margin-left: auto;
+			margin-right: auto;
+			top: 37px;
+			left: 0;
+			right: 0;
+			width: 90px;
+			text-align: center;
+			z-index: 10;
+			padding: 8px 13px;
+			background: rgb(235, 235, 39);
+			border-radius: 4px;
+			display: none;
+		}
+		#status {
+			color: grey;
+		}
+	</style>
 </head>
 <body>
 
+	<div id="main-wrapper" class="container">
+
+		<div id="temp-msg">Loading...</div>
+
+		<nav class="navbar navbar-default" role="navigation">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">To Do List App</a>
+			</div>
+			<ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Muhanad Al-Rubaiee <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Sign Out</a></li>
+          </ul>
+        </li>
+      </ul>
+		</nav>
+		
+		<form id="task-form" class="form-inline">
+			<input id="task-input" placeholder="Enter a task..." class="form-control" />
+			<input id="add-btn" type="submit" class="btn btn-primary" value="+" />
+		</form>
+
+		<div id="tasks-list"></div>
+		
+		<template id="tasks-list-template">
+			<ul id="tasks-list" class="list-unstyled">
+				{{#tasksList}}
+				<li id="{{ id }}" class="{{ status }}">
+					<div class="drag-handle">
+						<img class="img-responsive" src="/images/drag.png" />
+					</div>
+					<div class="item-checkbox">
+						<input type="checkbox" value=""/>
+					</div>
+					<div class="item-remove">
+						<i class="glyphicon glyphicon-remove"></i>
+					</div>
+					<div class="task">{{ task }}</div>
+					<div class="clearfix"></div>
+				</li>
+				{{/tasksList}}
+			</ul>
+		</template>
+
+		<div class="col-xs-2" id="status">1 task left</div>
+		<div class="col-xs-4">
+			<a href="#">Clear completed</a>
+		</div>
+
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script>
+	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+	<script>
+		
+		$(document).ready(function() {
+
+			$( "#tasks-list" ).sortable({
+				items: "> li",
+				cursor: "move",
+				handle: '.drag-handle',
+				stop: function() {
+					var items_order = $(this).sortable('toArray');
+				}
+			});
+
+			var list = [
+				{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
+				{'id': '4', 'status': 'incomplete', 'task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
+			];
+			var html_html = Mustache.render($("#tasks-list-template").html(), { tasksList: list });
+			$('#tasks-list').html(html_html);
+
+			// REMOVE
+
+			$('#tasks-list').on('click', '.item-remove', function(){
+				var task_id = $(this).parent().attr('id');
+				remove_item(task_id);
+			});
+
+			// ADD
+
+			$('#task-form input#add-btn').on('click', function(event){
+				event.preventDefault();
+				var task = $('#task-input').val();
+				if(task !== '') {
+					add_item(task);
+				}
+			});
+
+			$('#task-form').on('submit', function() {
+				
+			});
+
+			// EDIT
+
+			$("#tasks-list li").dblclick(function() {
+				var parent = $(this).parent();
+				$(this).html("<input type='text' value='" + $(this).text() + "'>");
+				$(this).children().focus();
+				return false;
+			});
+
+			$("#tasks-list li").on("blur", 'input', function() {
+				// Convert to text box
+				// alert($(this).html());
+				// $(this).replaceWith("<a href='" + $(this).val() + "'>");
+			});
+
+			function add_item(item) {
+				item_obj = {
+					'id': '4',
+					'status': 'incomplete',
+					'task': item
+				}
+				list.push(item_obj);
+				refresh_list();
+			}
+
+			function remove_item(id) {
+				for (var i = 0; i < list.length; i++) {
+					if (list[i]['id'] == id) {
+						list.splice(i, 1);
+						break;
+					}
+				}
+				refresh_list();
+			}
+
+			function refresh_list(){
+				var new_list_html = Mustache.render($("#tasks-list-template").html(), { tasksList: list });
+				$('#tasks-list').html(new_list_html);
+			}
+
+		});
+
+	</script>
 </body>
 </html>
