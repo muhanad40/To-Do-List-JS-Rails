@@ -66,6 +66,9 @@
 			margin-top: 6px;
 			max-width: 440px;
 		}
+		#tasks-list li.complete .task {
+			text-decoration: line-through;
+		}
 		#temp-msg {
 			position: absolute;
 			margin-left: auto;
@@ -111,17 +114,17 @@
 			<input id="add-btn" type="submit" class="btn btn-primary" value="+" />
 		</form>
 
-		<div id="tasks-list"></div>
+		<div id="all-tasks-list"></div>
 		
-		<template id="tasks-list-template">
+		<template id="tasks-list-template" type="text/x-handlebars-template">
 			<ul id="tasks-list" class="list-unstyled">
-				{{#tasksList}}
+				{{#each tasksList}}
 				<li id="{{ id }}" class="{{ status }}">
 					<div class="drag-handle">
 						<img class="img-responsive" src="/images/drag.png" />
 					</div>
 					<div class="item-checkbox">
-						<input type="checkbox" value=""/>
+						<input type="checkbox" class="checkbox" value=""/>
 					</div>
 					<div class="item-remove">
 						<i class="glyphicon glyphicon-remove"></i>
@@ -129,24 +132,33 @@
 					<div class="task">{{ task }}</div>
 					<div class="clearfix"></div>
 				</li>
-				{{/tasksList}}
+				{{/each}}
 			</ul>
 		</template>
 
-		<div class="col-xs-2" id="status">1 task left</div>
+		<div class="col-xs-2" id="tasks-left">1 task left</div>
 		<div class="col-xs-4">
-			<a href="#">Clear completed</a>
+			<a id="clear-completed" href="javascript:void(0);">Clear completed</a>
 		</div>
 
 	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script>
+	<!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script> -->
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.2/handlebars.min.js"></script>
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 	<script>
 		
 		$(document).ready(function() {
+
+			var data = { tasksList: [
+				{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
+				{'id': '3', 'status': 'incomplete', 'task': 'The printing and typesetting industry.'},
+				{'id': '1', 'status': 'incomplete', 'task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
+			]};
+
+			refresh_list();
 
 			$( "#tasks-list" ).sortable({
 				items: "> li",
@@ -157,18 +169,21 @@
 				}
 			});
 
-			var list = [
-				{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
-				{'id': '4', 'status': 'incomplete', 'task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
-			];
-			var html_html = Mustache.render($("#tasks-list-template").html(), { tasksList: list });
-			$('#tasks-list').html(html_html);
-
 			// REMOVE
 
-			$('#tasks-list').on('click', '.item-remove', function(){
+			$('#all-tasks-list').on('click', '#tasks-list .item-remove', function(){
 				var task_id = $(this).parent().attr('id');
 				remove_item(task_id);
+			});
+
+			$("#clear-completed").on('click', function() {
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i]['status'] == 'complete') {
+						data.tasksList.splice(i, 1);
+						console.log('a');
+					}
+				}
+				// refresh_list();
 			});
 
 			// ADD
@@ -183,42 +198,84 @@
 
 			// EDIT
 
-			$("#tasks-list li").dblclick(function() {
-				var parent = $(this).parent();
-				$(this).html("<input type='text' value='" + $(this).text() + "'>");
-				$(this).children().focus();
-				return false;
+			$("#all-tasks-list").on("dblclick", '#tasks-list li .task', function() {
+				item_id = $(this).parent().attr('id');
+				var text = $.trim($(this).text());
+				$(this).parent().html("<input type='text' value='" + text + "'>");
+				$("#all-tasks-list li#"+item_id).children().focus();
 			});
 
-			$("#tasks-list li").on("blur", 'input', function() {
-				// Convert to text box
-				// alert($(this).html());
-				// $(this).replaceWith("<a href='" + $(this).val() + "'>");
+			$("#all-tasks-list").on("blur", '#tasks-list li input', function() {
+				var task = $(this).val();
+				if(task !== '')
+				{
+					var id = $(this).parent().attr('id');
+					update_item(id, task, status);
+				}
 			});
+
+			// Mark as complete/incomplete
+			$("#all-tasks-list").on('change', '#tasks-list li .item-checkbox input', function(){
+				task_id = $(this).parent().parent().attr('id');
+				update_item_status(task_id, 'complete');
+			});
+
+			function get_count(type) {
+				var task_count = 0;
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i]['status'] == type) {
+						task_count++;
+					}
+				}
+				return task_count;
+			}
+
+			function update_item_status(id, status) {
+				var item_obj = find_item(id);
+				item_obj.status = status;
+				refresh_list();
+			}
+
+			function update_item(id, task, status) {
+				var item_obj = find_item(id);
+				item_obj.task = task;
+				refresh_list();
+			}
 
 			function add_item(item) {
-				item_obj = {
+				var item_obj = {
 					'id': '4',
 					'status': 'incomplete',
 					'task': item
 				}
-				list.push(item_obj);
+				data.tasksList.push(item_obj);
 				refresh_list();
 			}
 
+			function find_item(id) {
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i]['id'] == id) {
+						return data.tasksList[i];
+						break;
+					}
+				}
+			}
+
 			function remove_item(id) {
-				for (var i = 0; i < list.length; i++) {
-					if (list[i]['id'] == id) {
-						list.splice(i, 1);
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i]['id'] == id) {
+						data.tasksList.splice(i, 1);
 						break;
 					}
 				}
 				refresh_list();
 			}
 
-			function refresh_list(){
-				var new_list_html = Mustache.render($("#tasks-list-template").html(), { tasksList: list });
-				$('#tasks-list').html(new_list_html);
+			function refresh_list() {
+				var template = Handlebars.compile($("#tasks-list-template").html());
+				var html = template(data);
+				$('#all-tasks-list').html(html);
+				$("#tasks-left").html(get_count('incomplete') + " tasks left");
 			}
 
 		});
