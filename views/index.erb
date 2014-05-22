@@ -114,27 +114,29 @@
 			<input id="add-btn" type="submit" class="btn btn-primary" value="+" />
 		</form>
 
-		<div id="all-tasks-list"></div>
+		<div id="all-tasks-list">
+			
+		</div>
 		
-		<template id="tasks-list-template" type="text/x-handlebars-template">
+		<script type="text/template" id="list-template">
 			<ul id="tasks-list" class="list-unstyled">
-				{{#each tasksList}}
-				<li id="{{ id }}" class="{{ status }}">
-					<div class="drag-handle">
-						<img class="img-responsive" src="/images/drag.png" />
-					</div>
-					<div class="item-checkbox">
-						<input type="checkbox" class="checkbox" value=""/>
-					</div>
-					<div class="item-remove">
-						<i class="glyphicon glyphicon-remove"></i>
-					</div>
-					<div class="task">{{ task }}</div>
-					<div class="clearfix"></div>
-				</li>
-				{{/each}}
+				{{ _.each(tasksList, function(item) { }}
+					<li id="{{= item.id }}" class="{{= item.status }}">
+						<div class="drag-handle">
+							<img class="img-responsive" src="/images/drag.png" />
+						</div>
+						<div class="item-checkbox">
+							<input type="checkbox" class="checkbox" value="" />
+						</div>
+						<div class="item-remove">
+							<i class="glyphicon glyphicon-remove"></i>
+						</div>
+						<div class="task">{{= item.task }}</div>
+						<div class="clearfix"></div>
+					</li>
+				{{ }); }}
 			</ul>
-		</template>
+		</script>
 
 		<div class="col-xs-2" id="tasks-left">1 task left</div>
 		<div class="col-xs-4">
@@ -145,20 +147,37 @@
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-	<!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script> -->
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.2/handlebars.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
 	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 	<script>
 		
 		$(document).ready(function() {
 
+			_.templateSettings = {
+				interpolate: /\{\{\=(.+?)\}\}/g,
+				evaluate: /\{\{(.+?)\}\}/g
+			};
+
+			function getMaxOfArray(numArray) {
+				return Math.max.apply(null, numArray);
+			}
+
 			var data = { tasksList: [
 				{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
 				{'id': '3', 'status': 'incomplete', 'task': 'The printing and typesetting industry.'},
-				{'id': '1', 'status': 'incomplete', 'task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
+				{'id': '1', 'status': 'incomplete','task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
 			]};
 
-			refresh_list();
+			function generate_id() {
+				var new_id = getMaxOfArray($.map(data.tasksList, function(task){
+					return parseInt(task.id);
+				})) + 1;
+				return new_id;
+			}
+
+			// Render the list
+			var list_html = _.template($("#list-template").html(), data);
+			$('#all-tasks-list').html(list_html);
 
 			$( "#tasks-list" ).sortable({
 				items: "> li",
@@ -169,71 +188,42 @@
 				}
 			});
 
-			// REMOVE
+			// Add task
+			$('#task-form input#add-btn').on('click', function(event){
+				event.preventDefault();
+				var task = {
+					id: generate_id(),
+					task: $('#task-input').val(),
+					status: 'incomplete'
+				};
+				if(task.task !== '') {
+					add_item(task);
+					add_item_to_list(task);
+					$('#task-form #task-input').val('');
+				}
+			});
 
+			// Remove task
 			$('#all-tasks-list').on('click', '#tasks-list .item-remove', function(){
 				var task_id = $(this).parent().attr('id');
 				remove_item(task_id);
-			});
-
-			$("#clear-completed").on('click', function() {
-				for (var i = 0; i < data.tasksList.length; i++) {
-					if (data.tasksList[i]['status'] == 'complete') {
-						data.tasksList.splice(i, 1);
-						console.log('a');
-					}
-				}
-				// refresh_list();
-			});
-
-			// ADD
-
-			$('#task-form input#add-btn').on('click', function(event){
-				event.preventDefault();
-				var task = $('#task-input').val();
-				if(task !== '') {
-					add_item(task);
-				}
-			});
-
-			// EDIT
-
-			$("#all-tasks-list").on("dblclick", '#tasks-list li .task', function() {
-				item_id = $(this).parent().attr('id');
-				var text = $.trim($(this).text());
-				$(this).parent().html("<input type='text' value='" + text + "'>");
-				$("#all-tasks-list li#"+item_id).children().focus();
-			});
-
-			$("#all-tasks-list").on("blur", '#tasks-list li input', function() {
-				var task = $(this).val();
-				if(task !== '')
-				{
-					var id = $(this).parent().attr('id');
-					update_item(id, task, status);
-				}
+				remote_item_from_list(task_id);
+				refresh_count();
 			});
 
 			// Mark as complete/incomplete
 			$("#all-tasks-list").on('change', '#tasks-list li .item-checkbox input', function(){
-				task_id = $(this).parent().parent().attr('id');
-				update_item_status(task_id, 'complete');
+				var task_id = $(this).parent().parent().attr('id');
+				var checked = $(this).prop('checked');
+				var update_status = 'incomplete'
+				if(checked===true) update_status = 'complete';
+				update_item_status(task_id, update_status);
 			});
-
-			function get_count(type) {
-				var task_count = 0;
-				for (var i = 0; i < data.tasksList.length; i++) {
-					if (data.tasksList[i]['status'] == type) {
-						task_count++;
-					}
-				}
-				return task_count;
-			}
 
 			function update_item_status(id, status) {
 				var item_obj = find_item(id);
 				item_obj.status = status;
-				refresh_list();
+				$("ul li#"+id).attr('class', status);
 			}
 
 			function update_item(id, task, status) {
@@ -244,12 +234,45 @@
 
 			function add_item(item) {
 				var item_obj = {
-					'id': '4',
-					'status': 'incomplete',
-					'task': item
+					'id': item.id,
+					'status': item.status,
+					'task': item.task
 				}
 				data.tasksList.push(item_obj);
-				refresh_list();
+			}
+
+			function add_item_to_list(item_obj) {
+				var item_template = $($("#tasks-list-template").html()).find('li')[0].outerHTML;
+				var item_template = Handlebars.compile(item_template);
+				var task_html = item_template(item_obj);
+				$('#all-tasks-list ul').append(task_html);
+			}
+
+			function remove_item(id) {
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i]['id'] == id) {
+						data.tasksList.splice(i, 1);
+						break;
+					}
+				}
+			}
+
+			function remote_item_from_list(id) {
+				$('ul#tasks-list li#'+id).remove();
+			}
+
+			function count_by(filter, value) {
+				var task_count = 0;
+				for (var i = 0; i < data.tasksList.length; i++) {
+					if (data.tasksList[i][filter] == value) {
+						task_count++;
+					}
+				}
+				return task_count;
+			}
+
+			function refresh_count() {
+				$("#tasks-left").html(count_by('status', 'incomplete') + " tasks left");
 			}
 
 			function find_item(id) {
@@ -260,24 +283,7 @@
 					}
 				}
 			}
-
-			function remove_item(id) {
-				for (var i = 0; i < data.tasksList.length; i++) {
-					if (data.tasksList[i]['id'] == id) {
-						data.tasksList.splice(i, 1);
-						break;
-					}
-				}
-				refresh_list();
-			}
-
-			function refresh_list() {
-				var template = Handlebars.compile($("#tasks-list-template").html());
-				var html = template(data);
-				$('#all-tasks-list').html(html);
-				$("#tasks-left").html(get_count('incomplete') + " tasks left");
-			}
-
+			
 		});
 
 	</script>
