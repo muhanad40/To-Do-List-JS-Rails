@@ -118,23 +118,23 @@
 			
 		</div>
 		
-		<script type="text/template" id="list-template">
+		<script type="text/template" id="tasks-list-template">
 			<ul id="tasks-list" class="list-unstyled">
-				{{ _.each(tasksList, function(item) { }}
-					<li id="{{= item.id }}" class="{{= item.status }}">
+				## _.each(tasksList, function(item) { ##
+					<li id="##= item.id ##" class="##= item.status ##">
 						<div class="drag-handle">
 							<img class="img-responsive" src="/images/drag.png" />
 						</div>
 						<div class="item-checkbox">
-							<input type="checkbox" class="checkbox" value="" />
+							<input type="checkbox" class="checkbox" value="" ## if(item.status == 'complete') { ## checked ## } ## />
 						</div>
 						<div class="item-remove">
 							<i class="glyphicon glyphicon-remove"></i>
 						</div>
-						<div class="task">{{= item.task }}</div>
+						<div class="task">##= item.task ##</div>
 						<div class="clearfix"></div>
 					</li>
-				{{ }); }}
+				## }); ##
 			</ul>
 		</script>
 
@@ -154,8 +154,8 @@
 		$(document).ready(function() {
 
 			_.templateSettings = {
-				interpolate: /\{\{\=(.+?)\}\}/g,
-				evaluate: /\{\{(.+?)\}\}/g
+				interpolate: /\#\#\=(.+?)\#\#/g,
+				evaluate: /\#\#(.+?)\#\#/g
 			};
 
 			function getMaxOfArray(numArray) {
@@ -168,15 +168,11 @@
 				{'id': '1', 'status': 'incomplete','task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
 			]};
 
-			function generate_id() {
-				var new_id = getMaxOfArray($.map(data.tasksList, function(task){
-					return parseInt(task.id);
-				})) + 1;
-				return new_id;
-			}
+			// Refresh the total tasks left counter
+			refresh_count();
 
 			// Render the list
-			var list_html = _.template($("#list-template").html(), data);
+			var list_html = _.template($("#tasks-list-template").html(), data);
 			$('#all-tasks-list').html(list_html);
 
 			$( "#tasks-list" ).sortable({
@@ -198,7 +194,6 @@
 				};
 				if(task.task !== '') {
 					add_item(task);
-					add_item_to_list(task);
 					$('#task-form #task-input').val('');
 				}
 			});
@@ -218,6 +213,7 @@
 				var update_status = 'incomplete'
 				if(checked===true) update_status = 'complete';
 				update_item_status(task_id, update_status);
+				refresh_count();
 			});
 
 			function update_item_status(id, status) {
@@ -237,15 +233,20 @@
 					'id': item.id,
 					'status': item.status,
 					'task': item.task
-				}
+				};
 				data.tasksList.push(item_obj);
+				add_item_to_list(item_obj);
+				refresh_count();
 			}
 
 			function add_item_to_list(item_obj) {
-				var item_template = $($("#tasks-list-template").html()).find('li')[0].outerHTML;
-				var item_template = Handlebars.compile(item_template);
-				var task_html = item_template(item_obj);
-				$('#all-tasks-list ul').append(task_html);
+				var item_data = { tasksList: [
+					item_obj
+				]};
+				var item_template = $("#tasks-list-template").html();
+				var item_template = _.template(item_template, item_data);
+				var item_html = $(item_template).find('li')[0].outerHTML;
+				$('#all-tasks-list ul').append(item_html);
 			}
 
 			function remove_item(id) {
@@ -282,6 +283,13 @@
 						break;
 					}
 				}
+			}
+
+			function generate_id() {
+				var new_id = getMaxOfArray($.map(data.tasksList, function(task){
+					return parseInt(task.id);
+				})) + 1;
+				return new_id;
 			}
 			
 		});
