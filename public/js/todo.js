@@ -7,8 +7,8 @@ $(document).ready(function() {
 
 	var data = { tasksList: [
 		{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
-		{'id': '3', 'status': 'incomplete', 'task': 'The printing and typesetting industry.'},
-		{'id': '1', 'status': 'incomplete','task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
+		{'id': '3', 'status': 'complete', 'task': 'The printing and typesetting industry.'},
+		{'id': '1', 'status': 'complete','task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
 	]};
 
 	// Refresh the total tasks left counter
@@ -78,8 +78,7 @@ $(document).ready(function() {
 	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function(){
 		var task_id = $(this).parent().attr('id');
 		remove_item(task_id);
-		remote_item_from_list(task_id);
-		refresh_count();
+		remove_item_from_list(task_id);
 	});
 
 	// Mark as complete/incomplete
@@ -90,18 +89,16 @@ $(document).ready(function() {
 		if(checked===true) update_status = 'complete';
 		update_item(task_id, 'status', update_status);
 		update_item_status_html(task_id, update_status);
-		refresh_count();
 	});
 
 	// Clear completed tasks
 	$("#clear-completed").on('click', function() {
-		console.log(data.tasksList.length);
-		for (var i = 0; i < data.tasksList.length; i++) {
-			// if (data.tasksList[i]['status'] == 'complete') {
-			// 	data.tasksList.splice(i, 1);
-			// }
-		}
-		// refresh_list();
+		_.each(data.tasksList, function(item_obj) {
+			if(item_obj.status === 'complete') {
+				remove_item(item_obj.id);
+				remove_item_from_list(item_obj.id);
+			}
+		});
 	});
 
 	function refresh_item(id) {
@@ -110,11 +107,13 @@ $(document).ready(function() {
 		var item_html = _.template(item_template, item_data);
 		item_html = $(item_html).find('li').html();
 		$('ul li#'+id).html(item_html);
+		refresh_count();
 	}
 
 	function update_item(id, type, value) {
 		var item_obj = find_item(id);
 		item_obj[type] = value;
+		refresh_count();
 	}
 
 	function getMaxOfArray(numArray) {
@@ -147,15 +146,17 @@ $(document).ready(function() {
 	}
 
 	function remove_item(id) {
-		for (var i = 0; i < data.tasksList.length; i++) {
-			if (data.tasksList[i]['id'] == id) {
-				data.tasksList.splice(i, 1);
-				break;
-			}
+		var item_obj = find_item(id);
+		var item_index = data.tasksList.indexOf(item_obj);
+		console.log(data.tasksList)
+		if(item_index != -1)
+		{
+			data.tasksList.splice(item_index, 1);
+			refresh_count();
 		}
 	}
 
-	function remote_item_from_list(id) {
+	function remove_item_from_list(id) {
 		$('ul#tasks-list li#'+id).remove();
 	}
 
