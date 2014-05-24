@@ -153,14 +153,30 @@
 		
 		$(document).ready(function() {
 
+			// Edit task
+			$("#all-tasks-list").on("dblclick", '#tasks-list li .task', function() {
+				item_id = $(this).parent().attr('id');
+				var text = $.trim($(this).text());
+				var task = $(this).parent();
+
+				task.html("<input type='text' class='task-edit' value='" + text + "'>");
+				task.find('input:text').focus();
+			});
+
+			$("#all-tasks-list").on("blur", '#tasks-list li input.task-edit', function() {
+				var task_text = $(this).val();
+				if(task_text !== '')
+				{
+					var id = $(this).parent().attr('id');
+					update_item(id, 'task', task_text);
+				}
+				refresh_item(id);
+			});
+
 			_.templateSettings = {
 				interpolate: /\#\#\=(.+?)\#\#/g,
 				evaluate: /\#\#(.+?)\#\#/g
 			};
-
-			function getMaxOfArray(numArray) {
-				return Math.max.apply(null, numArray);
-			}
 
 			var data = { tasksList: [
 				{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
@@ -212,20 +228,30 @@
 				var checked = $(this).prop('checked');
 				var update_status = 'incomplete'
 				if(checked===true) update_status = 'complete';
-				update_item_status(task_id, update_status);
+				update_item(task_id, 'status', update_status);
+				update_item_status_html(task_id, update_status);
 				refresh_count();
 			});
 
-			function update_item_status(id, status) {
-				var item_obj = find_item(id);
-				item_obj.status = status;
-				$("ul li#"+id).attr('class', status);
+			function refresh_item(id) {
+				var item_data = {tasksList: [find_item(id)]};
+				var item_template = $("#tasks-list-template").html();
+				var item_html = _.template(item_template, item_data);
+				item_html = $(item_html).find('li').html();
+				$('ul li#'+id).html(item_html);
 			}
 
-			function update_item(id, task, status) {
+			function update_item(id, type, value) {
 				var item_obj = find_item(id);
-				item_obj.task = task;
-				refresh_list();
+				item_obj[type] = value;
+			}
+
+			function getMaxOfArray(numArray) {
+				return Math.max.apply(null, numArray);
+			}
+
+			function update_item_status_html(id, status) {
+				$("ul li#"+id).attr('class', status);
 			}
 
 			function add_item(item) {
