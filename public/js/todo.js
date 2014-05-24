@@ -51,6 +51,19 @@ $(document).ready(function() {
 		task.find('input:text').focus();
 	});
 
+	$("#all-tasks-list").on("keydown", '#tasks-list li input.task-edit', function(e) {
+		if(e.which == '13')
+		{
+			var task_text = $(this).val();
+			if(task_text !== '')
+			{
+				var id = $(this).parent().attr('id');
+				update_item(id, 'task', task_text);
+			}
+			refresh_item(id);
+		}
+	});
+
 	$("#all-tasks-list").on("blur", '#tasks-list li input.task-edit', function() {
 		var task_text = $(this).val();
 		if(task_text !== '')
@@ -82,10 +95,11 @@ $(document).ready(function() {
 
 	// Clear completed tasks
 	$("#clear-completed").on('click', function() {
+		console.log(data.tasksList.length);
 		for (var i = 0; i < data.tasksList.length; i++) {
-			if (data.tasksList[i]['status'] == 'complete') {
-				data.tasksList.splice(i, 1);
-			}
+			// if (data.tasksList[i]['status'] == 'complete') {
+			// 	data.tasksList.splice(i, 1);
+			// }
 		}
 		// refresh_list();
 	});
@@ -160,7 +174,6 @@ $(document).ready(function() {
 		var text = total_incomplete.toString();
 		text = text + " " + (total_incomplete == 0 || total_incomplete > 1 ? "tasks" : "task");
 		text = text + " left";
-		console.log(text);
 		$("#tasks-left").html(text);
 	}
 
