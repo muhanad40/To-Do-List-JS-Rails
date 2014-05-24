@@ -2,9 +2,9 @@
 <html>
 <head>
 	<title>To Do List app</title>
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap-theme.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/style.css" />
+	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css" />
 </head>
 <body>
 
@@ -22,7 +22,7 @@
 				## _.each(tasksList, function(item) { ##
 					<li id="##= item.id ##" class="##= item.status ##">
 						<div class="drag-handle">
-							<img class="img-responsive" src="/images/drag.png" />
+							<img class="img-responsive" src="assets/images/drag.png" />
 						</div>
 						<div class="item-checkbox">
 							<input type="checkbox" class="checkbox" value="" ## if(item.status == 'complete') { ## checked ## } ## />
@@ -45,9 +45,9 @@
 	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="/js/todo.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+	<script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="assets/js/todo.js"></script>
 </body>
 </html>
