@@ -59,6 +59,9 @@
 	margin-top: 6px;
 	max-width: 440px;
 }
+#tasks-list li.complete input {
+	text-decoration: line-through;
+}
 #tasks-list li.complete .task {
 	text-decoration: line-through;
 }
@@ -79,4 +82,8 @@
 }
 #status {
 	color: grey;
+}
+#clear-completed {
+	display: none;
+	cursor: pointer;
 }
