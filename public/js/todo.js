@@ -6,9 +6,7 @@ $(document).ready(function() {
 	};
 
 	var data = { tasksList: [
-		{'id': '9', 'status': 'complete', 'task': 'Do something today...'},
-		{'id': '3', 'status': 'complete', 'task': 'The printing and typesetting industry.'},
-		{'id': '1', 'status': 'complete','task': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'}
+		{'id': '9', 'status': 'incomplete', 'task': 'Do something today...'}
 	]};
 
 	// Refresh the total tasks left counter
@@ -142,7 +140,7 @@ $(document).ready(function() {
 		var item_template = $("#tasks-list-template").html();
 		var item_template = _.template(item_template, item_data);
 		var item_html = $(item_template).find('li')[0].outerHTML;
-		$('#all-tasks-list ul').append(item_html);
+		$(item_html).appendTo('#all-tasks-list ul').hide().fadeIn();
 	}
 
 	function remove_item(id) {
