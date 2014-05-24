@@ -12,7 +12,7 @@ $(document).ready(function() {
 	// Refresh the total tasks left counter
 	refresh_count();
 
-	refresh_clean_btn();
+	refresh_clear_btn();
 
 	// Render the list
 	var list_html = _.template($("#tasks-list-template").html(), data);
@@ -78,7 +78,7 @@ $(document).ready(function() {
 		var task_id = $(this).parent().attr('id');
 		remove_item(task_id);
 		remove_item_from_list(task_id);
-		refresh_clean_btn();
+		refresh_clear_btn();
 	});
 
 	// Mark as complete/incomplete
@@ -89,7 +89,7 @@ $(document).ready(function() {
 		if(checked===true) update_status = 'complete';
 		update_item(task_id, 'status', update_status);
 		update_item_status_html(task_id, update_status);
-		refresh_clean_btn();
+		refresh_clear_btn();
 	});
 
 	// Clear completed tasks
@@ -100,11 +100,11 @@ $(document).ready(function() {
 				remove_item_from_list(item_obj.id);
 			}
 		});
-		refresh_clean_btn();
+		refresh_clear_btn();
 	});
 
 	// Refresh the state of the "Clear complete (#) button"
-	function refresh_clean_btn() {
+	function refresh_clear_btn() {
 		var total_incomplete = count_by('status', 'complete');
 		var text = "Clear completed (" + total_incomplete + ")";
 		$("#clear-completed").hide();
