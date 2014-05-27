@@ -83,10 +83,10 @@ $(document).ready(function() {
 
 	// Mark as complete/incomplete
 	$("#all-tasks-list").on('change', '#tasks-list li .item-checkbox input', function(){
-		var task_id = $(this).parent().parent().attr('id');
+		var task_id = $(this).closest('li').attr('id');
 		var checked = $(this).prop('checked');
-		var update_status = 'incomplete'
-		if(checked===true) update_status = 'complete';
+		var update_status = (checked===true) ? 'complete' : 'incomplete'
+
 		update_item(task_id, 'status', update_status);
 		update_item_status_html(task_id, update_status);
 		refresh_clear_btn();
@@ -158,12 +158,8 @@ $(document).ready(function() {
 
 	function remove_item(id) {
 		var item_obj = find_item(id);
-		var item_index = data.tasksList.indexOf(item_obj);
-		if(item_index != -1)
-		{
-			data.tasksList.splice(item_index, 1);
-			refresh_count();
-		}
+		data.tasksList = _.without(data.tasksList, item_obj);
+		refresh_count();
 	}
 
 	function remove_item_from_list(id) {
@@ -196,7 +192,7 @@ $(document).ready(function() {
 				break;
 			}
 		}
-	}
+	} 
 
 	function generate_id() {
 		var new_id = getMaxOfArray($.map(data.tasksList, function(task){
