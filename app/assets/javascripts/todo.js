@@ -163,7 +163,9 @@ $(document).ready(function() {
 	}
 
 	function remove_item_from_list(id) {
-		$('ul#tasks-list li#'+id).remove();
+		$('ul#tasks-list li#'+id).fadeOut('fast', function(){
+			this.remove();
+		});
 	}
 
 	function count_by(filter, value) {
