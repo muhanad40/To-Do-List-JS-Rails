@@ -182,7 +182,6 @@ $(document).ready(function() {
 		text = text + " " + (total_incomplete == 0 || total_incomplete > 1 ? "tasks" : "task");
 		text = text + " left";
 		$("#tasks-left").html(text);
-		$("#clear-completed").show();
 	}
 
 	function find_item(id) {
