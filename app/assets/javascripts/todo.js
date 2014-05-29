@@ -5,10 +5,6 @@ $(document).ready(function() {
 		evaluate: /\#\#(.+?)\#\#/g
 	};
 
-	var data = { tasksList: [
-		{'id': '9', 'status': 'incomplete', 'task': 'Do something today...'}
-	]};
-
 	// Refresh the total tasks left counter
 	refresh_count();
 

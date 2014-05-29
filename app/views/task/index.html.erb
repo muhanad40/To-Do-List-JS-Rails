@@ -43,6 +43,12 @@
 		</ul>
 	</script>
 
+	<script type="text/javascript">
+		var data = {
+			tasksList: <%= current_user.tasks.to_json.html_safe %>
+		}
+	</script>
+
 	<div class="col-xs-3" id="tasks-left"></div>
 	<div class="col-xs-9 text-right">
 		<a id="clear-completed"></a>
