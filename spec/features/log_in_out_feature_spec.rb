@@ -14,7 +14,11 @@ describe 'To Do App' do
 	context 'When logged in' do
 
 		before(:each) do
-			user = User.create(full_name: 'Muhanad Al-Rubaiee', email: 'muhanad@gmail.com', password: '12345678', password_confirmation: '12345678')
+			user = User.create(full_name: 'Muhanad Al-Rubaiee',
+				email: 'muhanad@gmail.com',
+				password: '12345678',
+				password_confirmation: '12345678'
+			)
 			login_as user
 		end
 
