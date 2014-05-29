@@ -1,57 +1,55 @@
-	<div id="main-wrapper" class="container">
+<div id="main-wrapper" class="container">
 
 	<div id="temp-msg">Loading...</div>
 
-		<nav class="navbar navbar-default" role="navigation">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="#">To Do List App</a>
-			</div>
-			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><%= current_user.full_name %><b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li><a href="#"><%= link_to "Log Out", destroy_user_session_path, :method => :delete %></a></li>
-					</ul>
-				</li>
-			</ul>
-		</nav>
-		
-		<form id="task-form" class="form-inline">
-			<input id="task-input" placeholder="Enter a task..." class="form-control" />
-			<input id="add-btn" type="submit" class="btn btn-primary" value="+" />
-		</form>
-
-		<div id="all-tasks-list"></div>
-		
-		<script type="text/template" id="tasks-list-template">
-			<ul id="tasks-list" class="list-unstyled">
-				## _.each(tasksList, function(item) { ##
-					<li id="##= item.id ##" class="##= item.status ##">
-						<div class="drag-handle">
-							<img class="img-responsive" src="/assets/drag.png" />
-						</div>
-						<div class="item-checkbox">
-							<input type="checkbox" class="checkbox" value="" ## if(item.status == 'complete') { ## checked ## } ## />
-						</div>
-						<div class="item-remove">
-							<i class="glyphicon glyphicon-remove"></i>
-						</div>
-						<div class="task">##= item.task ##</div>
-						<div class="clearfix"></div>
-					</li>
-				## }); ##
-			</ul>
-		</script>
-
-		<div class="col-xs-3" id="tasks-left"></div>
-		<div class="col-xs-9 text-right">
-			<a id="clear-completed"></a>
+	<nav class="navbar navbar-default" role="navigation">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#">To Do List App</a>
 		</div>
+		<ul class="nav navbar-nav navbar-right">
+			<li class="dropdown">
+				<a href="#" class="dropdown-toggle" data-toggle="dropdown"><%= current_user.full_name %><b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><%= link_to "Log Out", destroy_user_session_path, :method => :delete %></li>
+				</ul>
+			</li>
+		</ul>
+	</nav>
+	
+	<form id="task-form" class="form-inline">
+		<input id="task-input" placeholder="Enter a task..." class="form-control" />
+		<input id="add-btn" type="submit" class="btn btn-primary" value="+" />
+	</form>
 
+	<div id="all-tasks-list"></div>
+	
+	<script type="text/template" id="tasks-list-template">
+		<ul id="tasks-list" class="list-unstyled">
+			## _.each(tasksList, function(item) { ##
+				<li id="##= item.id ##" class="##= item.status ##">
+					<div class="drag-handle">
+						<img class="img-responsive" src="/assets/drag.png" />
+					</div>
+					<div class="item-checkbox">
+						<input type="checkbox" class="checkbox" value="" ## if(item.status == 'complete') { ## checked ## } ## />
+					</div>
+					<div class="item-remove">
+						<i class="glyphicon glyphicon-remove"></i>
+					</div>
+					<div class="task">##= item.task ##</div>
+					<div class="clearfix"></div>
+				</li>
+			## }); ##
+		</ul>
+	</script>
+
+	<div class="col-xs-3" id="tasks-left"></div>
+	<div class="col-xs-9 text-right">
+		<a id="clear-completed"></a>
 	</div>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-	<script type="text/javascript" src="/assets/bootstrap.min.js"></script>
-	<script type="text/javascript" src="/assets/todo.js"></script>
+</div>
+
+<%= javascript_include_tag 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js' %>
+<%= javascript_include_tag 'http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js' %>
+<%= javascript_include_tag 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js' %>
