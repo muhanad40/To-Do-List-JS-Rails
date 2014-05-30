@@ -24,6 +24,7 @@ describe 'Tasks CRUD:' do
 		click_button '+'
 		wait_for_ajax
 		page.execute_script "$('.item-remove').trigger('click')"
+		wait_for_ajax
 		visit '/'
 		expect(page).not_to have_content 'Buy milk!'
 	end
