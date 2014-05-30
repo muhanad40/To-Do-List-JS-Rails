@@ -132,14 +132,17 @@ $(document).ready(function() {
 	}
 
 	function add_item(item) {
-		var item_obj = {
-			'id': item.id,
-			'status': item.status,
-			'task': item.task
-		};
-		data.tasksList.push(item_obj);
-		add_item_to_list(item_obj);
-		refresh_count();
+		$.ajax({
+			type: 'POST',
+			url: '/task',
+			data: 'task=' + item.task + '&status=' + item.status + '&order=' + item.order,
+			dataType: 'json'
+		}).done(function(response){
+			data.tasksList.push(response);
+			add_item_to_list(response);
+			refresh_count();
+		});
+		
 	}
 
 	function add_item_to_list(item_obj) {
