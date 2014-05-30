@@ -132,6 +132,7 @@ $(document).ready(function() {
 	}
 
 	function add_item(item) {
+		$('#temp-msg').fadeIn(100).show();
 		$.ajax({
 			type: 'POST',
 			url: '/task',
@@ -141,6 +142,7 @@ $(document).ready(function() {
 			data.tasksList.push(response);
 			add_item_to_list(response);
 			refresh_count();
+			$('#temp-msg').fadeOut(100).hide();
 		});
 		
 	}
