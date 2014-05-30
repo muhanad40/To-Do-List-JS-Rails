@@ -7,7 +7,6 @@ class TaskController < ApplicationController
 	def create
 		authenticate_user!
 		@task = current_user.tasks.create(task: params[:task], status: params[:status], user_id: current_user.id, order: params[:order])
-		# render :json => task.to_json
 		render 'task', content_type: :json
 	end
 
