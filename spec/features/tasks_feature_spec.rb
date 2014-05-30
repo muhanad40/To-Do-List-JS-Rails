@@ -23,8 +23,8 @@ describe 'Tasks CRUD:' do
 		fill_in 'task-input', :with => 'Buy milk!'
 		click_button '+'
 		wait_for_ajax
-		visit '/'
 		page.execute_script "$('.item-remove').trigger('click')"
+		visit '/'
 		expect(page).not_to have_content 'Buy milk!'
 	end
 
