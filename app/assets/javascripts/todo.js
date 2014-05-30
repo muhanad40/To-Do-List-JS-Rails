@@ -131,7 +131,7 @@ $(document).ready(function() {
 	}
 
 	function add_item(item) {
-		$('#temp-msg').fadeIn(100).show();
+		show_loading();
 		$.ajax({
 			type: 'POST',
 			url: '/task',
@@ -141,9 +141,17 @@ $(document).ready(function() {
 			data.tasksList.push(response);
 			add_item_to_list(response);
 			refresh_count();
-			$('#temp-msg').fadeOut(100).hide();
+			hide_loading();
 		});
 		
+	}
+
+	function show_loading() {
+		$('#temp-msg').fadeIn(100).show();
+	}
+
+	function hide_loading() {
+		$('#temp-msg').fadeOut(100).hide();
 	}
 
 	function add_item_to_list(item_obj) {
