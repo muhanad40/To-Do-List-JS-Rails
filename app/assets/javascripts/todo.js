@@ -73,7 +73,6 @@ $(document).ready(function() {
 	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function(){
 		var task_id = $(this).parent().attr('id');
 		remove_item(task_id);
-		remove_item_from_list(task_id);
 		refresh_clear_btn();
 	});
 
@@ -136,7 +135,7 @@ $(document).ready(function() {
 		$.ajax({
 			type: 'POST',
 			url: '/task',
-			data: 'task=' + item.task + '&status=' + item.status + '&order=' + item.order,
+			data: item,
 			dataType: 'json'
 		}).done(function(response){
 			data.tasksList.push(response);
@@ -159,8 +158,18 @@ $(document).ready(function() {
 
 	function remove_item(id) {
 		var item_obj = find_item(id);
-		data.tasksList = _.without(data.tasksList, item_obj);
-		refresh_count();
+		$.ajax({
+			type: 'DELETE',
+			url: '/task/' + id,
+			dataType: 'json'
+		}).done(function(){
+			data.tasksList = _.without(data.tasksList, item_obj);
+			remove_item_from_list(id);
+			refresh_count();
+		}).fail(function(){
+			alert("Something went wrong!");
+		});
+		
 	}
 
 	function remove_item_from_list(id) {

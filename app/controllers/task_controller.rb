@@ -10,4 +10,10 @@ class TaskController < ApplicationController
 		render :json => @task
 	end
 
+	def destroy
+		authenticate_user!
+		current_user.tasks.find(params[:id]).destroy!
+		render json: {}
+	end
+
 end
