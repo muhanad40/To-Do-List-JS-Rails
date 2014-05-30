@@ -18,4 +18,14 @@ describe 'Tasks CRUD:' do
 		expect(page).to have_content 'Buy milk!'
 	end
 
+	it 'Removes a list item', js: true do
+		visit '/'
+		fill_in 'task-input', :with => 'Buy milk!'
+		click_button '+'
+		wait_for_ajax
+		visit '/'
+		page.execute_script "$('.item-remove').trigger('click')"
+		expect(page).not_to have_content 'Buy milk!'
+	end
+
 end
