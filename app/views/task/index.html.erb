@@ -45,7 +45,7 @@
 
 	<script type="text/javascript">
 		var data = {
-			tasksList: <%= current_user.tasks.to_json.html_safe %>
+			tasksList: <%= current_user.tasks.to_json(:only => [:id, :task, :status, :order]).html_safe %>
 		}
 	</script>
 
