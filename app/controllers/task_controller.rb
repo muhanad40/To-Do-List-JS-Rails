@@ -23,4 +23,16 @@ class TaskController < ApplicationController
 		render json: {}
 	end
 
+	def reorder
+		authenticate_user!
+		item_ids = JSON.parse(params[:item_ids])
+		order = 1
+		item_ids.each do |id|
+			task = Task.find(id)
+			task.update!(order: order)
+			order+=1
+		end
+		render json: {}
+	end
+
 end
