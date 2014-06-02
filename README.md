@@ -3,7 +3,7 @@ To-Do-List
 
 A(nother) To Do List app written in JavaScript and Rails for practice
 
-![](screenshot.png)
+![](app_screenshot.png)
 
 I wanted to replicate the same functionalities as the ToDoMVC app (http://todomvc.com/architecture-examples/angularjs/)
 
