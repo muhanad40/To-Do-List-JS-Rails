@@ -20,6 +20,12 @@ $(document).ready(function() {
 		handle: '.drag-handle',
 		stop: function() {
 			var items_order = $(this).sortable('toArray');
+			$.ajax({
+				type: 'PATCH',
+				url: '/tasks/reorder',
+				data: 'item_ids=' + JSON.stringify(items_order),
+				dataType: 'json'
+			});
 		}
 	});
 
@@ -73,7 +79,6 @@ $(document).ready(function() {
 	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function() {
 		var task_id = $(this).parent().attr('id');
 		remove_item(task_id);
-		refresh_clear_btn();
 	});
 
 	// Mark as complete/incomplete
@@ -156,9 +161,7 @@ $(document).ready(function() {
 	}
 
 	function add_item(item) {
-		if(item.order === undefined) {
-			item.order = 0
-		}
+		item.order = getLastItem().order + 1 || 1
 		show_loading();
 		$.ajax({
 			type: 'POST',
@@ -171,6 +174,10 @@ $(document).ready(function() {
 			refresh_count();
 			hide_loading();
 		});
+	}
+
+	function getLastItem(){
+		return data.tasksList[data.tasksList.length - 1] || {}
 	}
 
 	function show_loading() {
@@ -201,6 +208,7 @@ $(document).ready(function() {
 			data.tasksList = _.without(data.tasksList, item_obj);
 			remove_item_from_list(id);
 			refresh_count();
+			refresh_clear_btn();
 		}).fail(function() {
 			alert("Something went wrong!");
 		});
