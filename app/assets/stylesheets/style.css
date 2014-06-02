@@ -87,3 +87,7 @@
 	display: none;
 	cursor: pointer;
 }
+#user-form {
+	margin-top: 40px;
+	width: 400px;
+}
