@@ -70,21 +70,20 @@ $(document).ready(function() {
 	});
 
 	// Remove task
-	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function(){
+	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function() {
 		var task_id = $(this).parent().attr('id');
 		remove_item(task_id);
 		refresh_clear_btn();
 	});
 
 	// Mark as complete/incomplete
-	$("#all-tasks-list").on('change', '#tasks-list li .item-checkbox input', function(){
+	$("#all-tasks-list").on('change', '#tasks-list li .item-checkbox input', function() {
 		var task_id = $(this).closest('li').attr('id');
 		var checked = $(this).prop('checked');
 		var update_status = (checked===true) ? 'complete' : 'incomplete'
 
 		update_item(task_id, 'status', update_status);
 		update_item_status_html(task_id, update_status);
-		refresh_clear_btn();
 	});
 
 	// Clear completed tasks
@@ -108,18 +107,44 @@ $(document).ready(function() {
 	}
 
 	function refresh_item(id) {
-		var item_data = {tasksList: [find_item(id)]};
-		var item_template = $("#tasks-list-template").html();
-		var item_html = _.template(item_template, item_data);
-		item_html = $(item_html).find('li').html();
-		$('ul li#'+id).html(item_html);
-		refresh_count();
+		refresh_data(function(){
+			var item_data = {tasksList: [find_item(id)]};
+			var item_template = $("#tasks-list-template").html();
+			var item_html = _.template(item_template, item_data);
+			item_html = $(item_html).find('li').html();
+			$('ul li#'+id).html(item_html);
+			refresh_count();
+		});
 	}
 
 	function update_item(id, type, value) {
-		var item_obj = find_item(id);
-		item_obj[type] = value;
-		refresh_count();
+		$.ajax({
+			type: 'PATCH',
+			url: '/task/' + id,
+			data: type + '=' + value,
+			dataType: 'json'
+		}).done(function(){
+			find_item(id)[type] = value;
+			refresh_count();
+			refresh_clear_btn();
+		}).fail(function() {
+			alert('Something went wrong');
+		});
+
+	}
+
+	function refresh_data(callback) {
+		callback = callback || function(){};
+		$.ajax({
+			type: 'GET',
+			url: '/tasks',
+			dataType: 'json'
+		}).done(function(response_data){
+			data.tasksList = response_data;
+			callback();
+		}).fail(function() {
+			alert('Something went wrong');
+		});
 	}
 
 	function getMaxOfArray(numArray) {
@@ -131,6 +156,9 @@ $(document).ready(function() {
 	}
 
 	function add_item(item) {
+		if(item.order === undefined) {
+			item.order = 0
+		}
 		show_loading();
 		$.ajax({
 			type: 'POST',
@@ -143,7 +171,6 @@ $(document).ready(function() {
 			refresh_count();
 			hide_loading();
 		});
-		
 	}
 
 	function show_loading() {
@@ -170,18 +197,17 @@ $(document).ready(function() {
 			type: 'DELETE',
 			url: '/task/' + id,
 			dataType: 'json'
-		}).done(function(){
+		}).done(function() {
 			data.tasksList = _.without(data.tasksList, item_obj);
 			remove_item_from_list(id);
 			refresh_count();
-		}).fail(function(){
+		}).fail(function() {
 			alert("Something went wrong!");
 		});
-		
 	}
 
 	function remove_item_from_list(id) {
-		$('ul#tasks-list li#'+id).fadeOut('fast', function(){
+		$('ul#tasks-list li#'+id).fadeOut('fast', function() {
 			this.remove();
 		});
 	}
