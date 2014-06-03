@@ -28,7 +28,7 @@
 			## _.each(tasksList, function(item) { ##
 				<li id="##= item.id ##" class="##= item.status ##">
 					<div class="drag-handle">
-						<img class="img-responsive" src="/assets/drag.png" />
+						<img class="img-responsive" src="<%= image_path 'drag.png' %>" />
 					</div>
 					<div class="item-checkbox">
 						<input type="checkbox" class="checkbox" value="" ## if(item.status == 'complete') { ## checked ## } ## />
