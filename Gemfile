@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 
 gem 'devise'
+gem 'heroku_secrets', github: 'alexpeattie/heroku_secrets'
+gem 'rails_12factor'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.1'
@@ -14,8 +16,6 @@ gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.0.0'
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
 # gem 'therubyracer',  platforms: :ruby
-
-gem 'heroku_secrets', github: 'alexpeattie/heroku_secrets'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
