@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resources :task
   root 'task#index'
   patch 'tasks/reorder', to: 'task#reorder'
+  get 'tasks', to: 'task#all_tasks'
   
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
