@@ -1,14 +1,170 @@
 $(document).ready(function() {
 
+	var ToDo = function() {}
+
+	// Refresh the state of the "Clear complete (#) button"
+	ToDo.prototype.refreshClearBtn = function() {
+		var total_incomplete = todo.count_by('status', 'complete');
+		var text = "Clear completed (" + total_incomplete + ")";
+		$("#clear-completed").hide();
+		if(total_incomplete)
+			$("#clear-completed").show().html(text);
+	}
+
+	ToDo.prototype.refresh_item = function(id) {
+		refresh_data(function(){
+			var item_data = {tasksList: [find_item(id)]};
+			var item_template = $("#tasks-list-template").html();
+			var item_html = _.template(item_template, item_data);
+			item_html = $(item_html).find('li').html();
+			$('ul li#'+id).html(item_html);
+			todo.refresh_count();
+		});
+	}
+
+	ToDo.prototype.update_item = function(id, type, value) {
+		$.ajax({
+			type: 'PATCH',
+			url: '/task/' + id,
+			data: type + '=' + value,
+			dataType: 'json'
+		}).done(function(){
+			find_item(id)[type] = value;
+			todo.refresh_count();
+			todo.refreshClearBtn();
+		}).fail(function() {
+			alert('Something went wrong');
+		});
+
+	}
+
+	ToDo.prototype.refresh_data = function(callback) {
+		callback = callback || function(){};
+		$.ajax({
+			type: 'GET',
+			url: '/tasks',
+			dataType: 'json'
+		}).done(function(response_data){
+			data.tasksList = response_data;
+			callback();
+		}).fail(function() {
+			alert('Something went wrong');
+		});
+	}
+
+	ToDo.prototype.getMaxOfArray = function(numArray) {
+		return Math.max.apply(null, numArray);
+	}
+
+	ToDo.prototype.update_item_status_html = function(id, status) {
+		$("ul li#"+id).attr('class', status);
+	}
+
+	ToDo.prototype.add_item = function(item) {
+		item.order = todo.getLastItem().order + 1 || 1
+		todo.show_loading();
+		$.ajax({
+			type: 'POST',
+			url: '/task',
+			data: item,
+			dataType: 'json'
+		}).done(function(response){
+			data.tasksList.push(response);
+			todo.add_item_to_list(response);
+			todo.refresh_count();
+			todo.hide_loading();
+		});
+	}
+
+	ToDo.prototype.getLastItem = function(){
+		return data.tasksList[data.tasksList.length - 1] || {}
+	}
+
+	ToDo.prototype.show_loading = function() {
+		$('#temp-msg').fadeIn(100).show();
+	}
+
+	ToDo.prototype.hide_loading = function() {
+		$('#temp-msg').fadeOut(100).hide();
+	}
+
+	ToDo.prototype.add_item_to_list = function(item_obj) {
+		var item_data = { tasksList: [
+			item_obj
+		]};
+		var item_template = $("#tasks-list-template").html();
+		var item_template = _.template(item_template, item_data);
+		var item_html = $(item_template).find('li')[0].outerHTML;
+		$(item_html).appendTo('#all-tasks-list ul').hide().fadeIn();
+	}
+
+	ToDo.prototype.remove_item = function(id) {
+		var item_obj = find_item(id);
+		$.ajax({
+			type: 'DELETE',
+			url: '/task/' + id,
+			dataType: 'json'
+		}).done(function() {
+			data.tasksList = _.without(data.tasksList, item_obj);
+			remove_item_from_list(id);
+			todo.refresh_count();
+			todo.refreshClearBtn();
+		}).fail(function() {
+			alert("Something went wrong!");
+		});
+	}
+
+	ToDo.prototype.remove_item_from_list = function(id) {
+		$('ul#tasks-list li#'+id).fadeOut('fast', function() {
+			this.remove();
+		});
+	}
+
+	ToDo.prototype.count_by = function(filter, value) {
+		var task_count = 0;
+		for (var i = 0; i < data.tasksList.length; i++) {
+			if (data.tasksList[i][filter] == value) {
+				task_count++;
+			}
+		}
+		return task_count;
+	}
+
+	ToDo.prototype.refresh_count = function() {
+		var total_incomplete = todo.count_by('status', 'incomplete');
+		var text = total_incomplete.toString();
+		text = text + " " + (total_incomplete == 0 || total_incomplete > 1 ? "tasks" : "task");
+		text = text + " left";
+		$("#tasks-left").html(text);
+	}
+
+	ToDo.prototype.find_item = function(id) {
+		for (var i = 0; i < data.tasksList.length; i++) {
+			if (data.tasksList[i]['id'] == id) {
+				return data.tasksList[i];
+				break;
+			}
+		}
+	} 
+
+	ToDo.prototype.generate_id = function() {
+		var new_id = todo.getMaxOfArray($.map(data.tasksList, function(task){
+			return parseInt(task.id);
+		})) + 1;
+		return new_id;
+	}
+
+	todo = new ToDo();
+
 	_.templateSettings = {
 		interpolate: /\#\#\=(.+?)\#\#/g,
 		evaluate: /\#\#(.+?)\#\#/g
 	};
 
 	// Refresh the total tasks left counter
-	refresh_count();
+	todo.refresh_count();
 
-	refresh_clear_btn();
+	todo.refreshClearBtn();
 
 	// Render the list
 	var list_html = _.template($("#tasks-list-template").html(), data);
@@ -33,12 +189,12 @@ $(document).ready(function() {
 	$('#task-form input#add-btn').on('click', function(event){
 		event.preventDefault();
 		var task = {
-			id: generate_id(),
+			id: todo.generate_id(),
 			task: $('#task-input').val(),
 			status: 'incomplete'
 		};
 		if(task.task !== '') {
-			add_item(task);
+			todo.add_item(task);
 			$('#task-form #task-input').val('');
 		}
 	});
@@ -99,159 +255,7 @@ $(document).ready(function() {
 				remove_item_from_list(item_obj.id);
 			}
 		});
-		refresh_clear_btn();
+		todo.refreshClearBtn();
 	});
-
-	// Refresh the state of the "Clear complete (#) button"
-	function refresh_clear_btn() {
-		var total_incomplete = count_by('status', 'complete');
-		var text = "Clear completed (" + total_incomplete + ")";
-		$("#clear-completed").hide();
-		if(total_incomplete)
-			$("#clear-completed").show().html(text);
-	}
-
-	function refresh_item(id) {
-		refresh_data(function(){
-			var item_data = {tasksList: [find_item(id)]};
-			var item_template = $("#tasks-list-template").html();
-			var item_html = _.template(item_template, item_data);
-			item_html = $(item_html).find('li').html();
-			$('ul li#'+id).html(item_html);
-			refresh_count();
-		});
-	}
-
-	function update_item(id, type, value) {
-		$.ajax({
-			type: 'PATCH',
-			url: '/task/' + id,
-			data: type + '=' + value,
-			dataType: 'json'
-		}).done(function(){
-			find_item(id)[type] = value;
-			refresh_count();
-			refresh_clear_btn();
-		}).fail(function() {
-			alert('Something went wrong');
-		});
-
-	}
-
-	function refresh_data(callback) {
-		callback = callback || function(){};
-		$.ajax({
-			type: 'GET',
-			url: '/tasks',
-			dataType: 'json'
-		}).done(function(response_data){
-			data.tasksList = response_data;
-			callback();
-		}).fail(function() {
-			alert('Something went wrong');
-		});
-	}
-
-	function getMaxOfArray(numArray) {
-		return Math.max.apply(null, numArray);
-	}
-
-	function update_item_status_html(id, status) {
-		$("ul li#"+id).attr('class', status);
-	}
-
-	function add_item(item) {
-		item.order = getLastItem().order + 1 || 1
-		show_loading();
-		$.ajax({
-			type: 'POST',
-			url: '/task',
-			data: item,
-			dataType: 'json'
-		}).done(function(response){
-			data.tasksList.push(response);
-			add_item_to_list(response);
-			refresh_count();
-			hide_loading();
-		});
-	}
-
-	function getLastItem(){
-		return data.tasksList[data.tasksList.length - 1] || {}
-	}
-
-	function show_loading() {
-		$('#temp-msg').fadeIn(100).show();
-	}
-
-	function hide_loading() {
-		$('#temp-msg').fadeOut(100).hide();
-	}
-
-	function add_item_to_list(item_obj) {
-		var item_data = { tasksList: [
-			item_obj
-		]};
-		var item_template = $("#tasks-list-template").html();
-		var item_template = _.template(item_template, item_data);
-		var item_html = $(item_template).find('li')[0].outerHTML;
-		$(item_html).appendTo('#all-tasks-list ul').hide().fadeIn();
-	}
-
-	function remove_item(id) {
-		var item_obj = find_item(id);
-		$.ajax({
-			type: 'DELETE',
-			url: '/task/' + id,
-			dataType: 'json'
-		}).done(function() {
-			data.tasksList = _.without(data.tasksList, item_obj);
-			remove_item_from_list(id);
-			refresh_count();
-			refresh_clear_btn();
-		}).fail(function() {
-			alert("Something went wrong!");
-		});
-	}
-
-	function remove_item_from_list(id) {
-		$('ul#tasks-list li#'+id).fadeOut('fast', function() {
-			this.remove();
-		});
-	}
-
-	function count_by(filter, value) {
-		var task_count = 0;
-		for (var i = 0; i < data.tasksList.length; i++) {
-			if (data.tasksList[i][filter] == value) {
-				task_count++;
-			}
-		}
-		return task_count;
-	}
-
-	function refresh_count() {
-		var total_incomplete = count_by('status', 'incomplete');
-		var text = total_incomplete.toString();
-		text = text + " " + (total_incomplete == 0 || total_incomplete > 1 ? "tasks" : "task");
-		text = text + " left";
-		$("#tasks-left").html(text);
-	}
-
-	function find_item(id) {
-		for (var i = 0; i < data.tasksList.length; i++) {
-			if (data.tasksList[i]['id'] == id) {
-				return data.tasksList[i];
-				break;
-			}
-		}
-	} 
-
-	function generate_id() {
-		var new_id = getMaxOfArray($.map(data.tasksList, function(task){
-			return parseInt(task.id);
-		})) + 1;
-		return new_id;
-	}
 	
 });
