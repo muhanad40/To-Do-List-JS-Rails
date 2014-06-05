@@ -106,7 +106,7 @@ $(document).ready(function() {
 			dataType: 'json'
 		}).done(function() {
 			data.tasksList = _.without(data.tasksList, item_obj);
-			remove_item_from_list(id);
+			todo.remove_item_from_list(id);
 			todo.refresh_count();
 			todo.refreshClearBtn();
 		}).fail(function() {
@@ -234,7 +234,7 @@ $(document).ready(function() {
 	// Remove task
 	$('#all-tasks-list').on('click', '#tasks-list .item-remove', function() {
 		var task_id = $(this).parent().attr('id');
-		remove_item(task_id);
+		todo.remove_item(task_id);
 	});
 
 	// Mark as complete/incomplete
@@ -251,8 +251,8 @@ $(document).ready(function() {
 	$("#clear-completed").on('click', function() {
 		_.each(data.tasksList, function(item_obj) {
 			if(item_obj.status === 'complete') {
-				remove_item(item_obj.id);
-				remove_item_from_list(item_obj.id);
+				todo.remove_item(item_obj.id);
+				todo.remove_item_from_list(item_obj.id);
 			}
 		});
 		todo.refreshClearBtn();
