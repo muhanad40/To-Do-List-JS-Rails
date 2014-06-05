@@ -17,6 +17,7 @@ http://todo-muhanad.herokuapp.com
 Then visit **http://localhost:3000**
 
 If you want to run the RSpec tests, run:
+
 	bin/rake db:create RAILS_ENV=test
 	bin/rake db:migrate RAILS_ENV=test
 	rspec
