@@ -8,7 +8,7 @@ A(nother) To Do List app written in JavaScript (Front-end) and Rails (Back-end) 
 ## Demo
 http://todo-muhanad.herokuapp.com
 
-## Instructions
+## Installation instructions
 	git clone git@github.com:muhanad40/To-Do-List-JS-Rails.git
 	cd To-Do-List-JS-Rails
 	bin/rake db:create
