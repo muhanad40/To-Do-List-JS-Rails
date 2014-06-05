@@ -13,7 +13,7 @@ $(document).ready(function() {
 
 	ToDo.prototype.refresh_item = function(id) {
 		refresh_data(function(){
-			var item_data = {tasksList: [find_item(id)]};
+			var item_data = {tasksList: [todo.find_item(id)]};
 			var item_template = $("#tasks-list-template").html();
 			var item_html = _.template(item_template, item_data);
 			item_html = $(item_html).find('li').html();
@@ -29,7 +29,7 @@ $(document).ready(function() {
 			data: type + '=' + value,
 			dataType: 'json'
 		}).done(function(){
-			find_item(id)[type] = value;
+			todo.find_item(id)[type] = value;
 			todo.refresh_count();
 			todo.refreshClearBtn();
 		}).fail(function() {
@@ -99,7 +99,7 @@ $(document).ready(function() {
 	}
 
 	ToDo.prototype.remove_item = function(id) {
-		var item_obj = find_item(id);
+		var item_obj = todo.find_item(id);
 		$.ajax({
 			type: 'DELETE',
 			url: '/task/' + id,
